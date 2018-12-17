@@ -26,7 +26,7 @@ export class Importer {
             const currentDir = this.files[path];
             switch (operation) {
                 case CHANGE:
-                    this.transformCVStoJSON({path, fileName});
+                    this.transformCSVtoJSON({path, fileName});
                     break;
                 case DELETE:
                     if (currentDir[fileName]) {
@@ -44,7 +44,7 @@ export class Importer {
         })
     }
 
-    transformCVStoJSON({fileName, path}) {
+    transformCSVtoJSON({fileName, path}) {
         const filePath = resolve(path, fileName);
         csv().fromFile(filePath)
             .then((json)=>{

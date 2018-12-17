@@ -15,7 +15,7 @@ export class DirWatcher extends EventEmitter {
 
     addUpdateFile({importedFiles, dirContent, path}) {
         dirContent.forEach((fileName) => {
-            if (fileName.indexOf('.cvs') === -1) {
+            if (fileName.indexOf('.csv') === -1) {
                 return;
             }
             const filePath = resolve(path, fileName);
