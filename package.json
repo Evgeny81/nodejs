@@ -4,7 +4,6 @@
   "description": "NodeJS homework application",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon --exec babel-node app.js",
     "test": ""
   },
   "repository": {

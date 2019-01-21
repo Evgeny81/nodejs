@@ -7,7 +7,21 @@
 ```
 npm install
 ```
-3. Run project
+3. Run
 ```
-npm start
+node utils/streams.js <arguments>
 ```
+
+Examples:
+
+./streams.js --action=outputFile --file=users.csv
+
+./streams.js --action=transformToFile --file=users.csv
+
+./streams.js --action=transform textToTransform
+
+./streams.js -a outputFile -f users.csv
+
+./streams.js --help
+
+./streams.js -h
