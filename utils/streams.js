@@ -120,7 +120,6 @@ function convertToFile(filePath) {
 }
 
 function cssBundler(path) {
-    console.log(__dirname);
     const pathToDir = resolve(path);
     fs.readdir(pathToDir, (err, res) => {
         if (err) {
@@ -129,15 +128,17 @@ function cssBundler(path) {
 
         const bundle = fs.createWriteStream(pathToDir + '/bundle.css');
 
+        let readStream;
         res.forEach(fileName => {
-            const readStream = fs.createReadStream(pathToDir + `/${fileName}`);
+            readStream = fs.createReadStream(pathToDir + `/${fileName}`);
             readStream.on('data', (data) => {
                 bundle.write(data)
             })
-
         });
 
-        bundle.end();
+        readStream.on('close', () => {
+            bundle.end();
+        })
     })
 }
 
