@@ -1,88 +1,136 @@
 const fs = require('fs');
 const csv = require('csvtojson');
 const {resolve} = require('path');
-const {helpMessage} = require('./constants');
+const {
+    helpMessage,
+    possibleFlags,
+    shortNameArgumentPattern,
+    fullNameArgumentPattern
+} = require('./constants');
 
-const args = [];
-const thingsToDo = {};
-
-process.argv.slice(2).forEach((val) => {
-    const equalSignIndex = val.indexOf('=');
-    if (equalSignIndex > -1) {
-        args.push(val.slice(0, equalSignIndex));
-        args.push(val.slice(equalSignIndex + 1));
-    } else {
-        args.push(val);
+const executionMap = {
+    action: {
+        flag: '-a',
+        execution: {
+            reverse,
+            transform,
+            outputFile,
+            convertFromFile,
+            convertToFile,
+            cssBundler
+        },
+        toExecute: null
+    },
+    help: {
+        flag: '-h'
+    },
+    file: {
+        flag: '-f'
+    },
+    path: {
+        flag: '-p'
     }
-});
+};
 
-args.forEach(handleArgs);
-
-function handleArgs(arg, index) {
-    switch (arg) {
-        case '--help':
-        case '-h':
-            if (index === 0) {
-                thingsToDo.help = true;
-            }
-            break;
-        case '--action':
-        case '-a':
-            thingsToDo.action = getValue(index);
-            break;
-        case '--path':
-        case '-p':
-            thingsToDo.path = getValue(index);
-            break;
-        case '--file':
-        case '-f':
-            thingsToDo.file = getValue(index);
-            break;
-        default:
-            break;
-    }
-}
-
-function getValue(index) {
-    const value = (index > -1) ? args[index + 1] : null;
-    if (value === 'reverse' || value === 'transform') {
-        if (args[index + 2]) {
-            thingsToDo.string = args[index + 2];
+function getArguments(userInput) {
+    const args = [];
+    userInput.slice(2).forEach((val) => {
+        const equalSignIndex = val.indexOf('=');
+        if (equalSignIndex > -1) {
+            args.push(val.slice(0, equalSignIndex));
+            args.push(val.slice(equalSignIndex + 1));
         } else {
-            throw new Error('You should specify the string');
+            args.push(val);
         }
-    }
-    return value;
+    });
+
+    return args.map(item => { // convert all user input flags to '-f'-like string instead of '--flag'
+        // for correct flags
+        const flagIsNotCorrect = (
+            item.match(fullNameArgumentPattern)
+            || item.match(shortNameArgumentPattern))
+            && !possibleFlags.includes(item
+            );
+        if (flagIsNotCorrect) {
+            help();
+            process.stderr.write('\nWRONG INPUT: You should provide correct flag \n');
+            process.exit();
+        }
+        if (item.match(fullNameArgumentPattern)) {
+            return `-${item[2]}`;
+        }
+        return item;
+    });
 }
 
-if (thingsToDo.help || !args.length) {
+const args = getArguments(process.argv);
+
+if (args[0] === executionMap.help.flag || !args.length) {
     if (!args.length) {
-        process.stderr.write('WRONG INPUT: Please, provide the arguments \n\n')
+        process.stderr.write('\nWRONG INPUT: Please, provide the arguments \n\n');
     }
     help();
     process.exit();
 }
 
+if (!args.includes(executionMap.action.flag)) {
+    process.stderr.write('\nWRONG INPUT: Please, provide the "--action" flag with certain action \n\n');
+    help();
+    process.exit();
+}
 
-switch (thingsToDo.action) {
-    case 'reverse':
-        reverse(thingsToDo.string);
-        break;
-    case 'transform':
-        transform(thingsToDo.string);
-        break;
-    case 'outputFile':
-        outputFile(thingsToDo.file);
-        break;
-    case 'convertFromFile':
-        convertFromFile(thingsToDo.file);
-        break;
-    case 'convertToFile':
-        convertToFile(thingsToDo.file);
-        break;
-    case 'cssBundler':
-        cssBundler(thingsToDo.path);
-        break;
+function getIndex(flag) {
+    return args.indexOf(flag);
+}
+
+function getParameter(index) {
+    return args[index + 1];
+}
+
+const actionFlagIndex = getIndex(executionMap.action.flag);
+const actionToExecute = getParameter(actionFlagIndex);
+
+if (!Object.keys(executionMap.action.execution).includes(actionToExecute)) {
+    process.stderr.write('\nWRONG INPUT: Please, provide action with a correct parameter \n\n');
+    process.stderr.write(helpMessage[3]);
+    process.exit();
+} else {
+    switch (actionToExecute) {
+        case 'reverse':
+        case 'transform':
+            const strToHandle = args[actionFlagIndex + 2];
+            if (strToHandle.match(shortNameArgumentPattern)) {
+                process.stderr.write('\nWRONG INPUT: Please, provide a correct string to handle \n\n');
+                process.exit();
+            }
+            executionMap.action.execution[actionToExecute](strToHandle);
+            break;
+        case 'outputFile':
+        case 'convertFromFile':
+        case 'convertToFile':
+            const fileFlagIndex = getIndex(executionMap.file.flag);
+            if (fileFlagIndex === -1) {
+                process.stderr.write('\nWRONG INPUT: Path to file should be provided \n\n');
+                process.exit();
+            }
+            const fileToHandle = getParameter(fileFlagIndex);
+
+            if (!~fileToHandle.indexOf('.csv')) {
+                process.stderr.write('\nWRONG INPUT: Correct file should be provided \n\n');
+                process.exit();
+            }
+            executionMap.action.execution[actionToExecute](fileToHandle);
+            break;
+        case 'cssBundler':
+            const pathFlagIndex = getIndex(executionMap.path.flag);
+            const pathToHandle = getParameter(pathFlagIndex);
+            if (pathFlagIndex === -1 || !pathToHandle) {
+                process.stderr.write('\nWRONG INPUT: Path to directory should be provided \n\n');
+                process.exit();
+            }
+            executionMap.action.execution[actionToExecute](pathToHandle);
+            break;
+    }
 }
 
 function help() {
@@ -100,19 +148,19 @@ function transform(str) {
 }
 
 function outputFile(filePath) {
-    const stream = fs.createReadStream(filePath);
+    const stream = fs.createReadStream(resolve(filePath));
     stream.pipe(process.stdout);
 }
 
 function convertFromFile(filePath) {
-    transformCSVtoJSON(filePath).then((json)=>{
+    transformCSVtoJSON(filePath).then((json) => {
         process.stdout.write(JSON.stringify(json));
     });
 }
 
 function convertToFile(filePath) {
     const fileName = filePath.slice(0, filePath.indexOf('.'));
-    transformCSVtoJSON(filePath).then((json)=>{
+    transformCSVtoJSON(filePath).then((json) => {
         const file = fs.createWriteStream(`${fileName}.json`);
         file.write(JSON.stringify(json));
         file.end();
@@ -132,14 +180,14 @@ function cssBundler(path) {
         res.forEach(fileName => {
             readStream = fs.createReadStream(pathToDir + `/${fileName}`);
             readStream.on('data', (data) => {
-                bundle.write(data)
-            })
+                bundle.write(data);
+            });
         });
 
         readStream.on('close', () => {
             bundle.end();
-        })
-    })
+        });
+    });
 }
 
 function transformCSVtoJSON(filePath) {
