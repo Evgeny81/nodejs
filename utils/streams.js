@@ -1,12 +1,22 @@
 const fs = require('fs');
 const csv = require('csvtojson');
+const EventEmitter = require('events');
 const {resolve} = require('path');
 const {
     helpMessage,
     possibleFlags,
+    errors,
     shortNameArgumentPattern,
     fullNameArgumentPattern
 } = require('./constants');
+
+const errorEmitter = new EventEmitter();
+
+errorEmitter.on('error', (error) => {
+    help();
+    if (error) process.stderr.write(error);
+    process.exit(1);
+});
 
 const executionMap = {
     action: {
@@ -52,9 +62,7 @@ function getArguments(userInput) {
             && !possibleFlags.includes(item
             );
         if (flagIsNotCorrect) {
-            help();
-            process.stderr.write('\nWRONG INPUT: You should provide correct flag \n');
-            process.exit();
+            errorEmitter.emit('error', errors.incorrectFlag);
         }
         if (item.match(fullNameArgumentPattern)) {
             return `-${item[2]}`;
@@ -67,16 +75,14 @@ const args = getArguments(process.argv);
 
 if (args[0] === executionMap.help.flag || !args.length) {
     if (!args.length) {
-        process.stderr.write('\nWRONG INPUT: Please, provide the arguments \n\n');
+        errorEmitter.emit('error', errors.noArguments);
+    } else {
+        errorEmitter.emit('error', null);
     }
-    help();
-    process.exit();
 }
 
 if (!args.includes(executionMap.action.flag)) {
-    process.stderr.write('\nWRONG INPUT: Please, provide the "--action" flag with certain action \n\n');
-    help();
-    process.exit();
+    errorEmitter.emit('error', errors.noAction);
 }
 
 function getIndex(flag) {
@@ -91,17 +97,14 @@ const actionFlagIndex = getIndex(executionMap.action.flag);
 const actionToExecute = getParameter(actionFlagIndex);
 
 if (!Object.keys(executionMap.action.execution).includes(actionToExecute)) {
-    process.stderr.write('\nWRONG INPUT: Please, provide action with a correct parameter \n\n');
-    process.stderr.write(helpMessage[3]);
-    process.exit();
+    errorEmitter.emit('error', errors.wrongActionParameter);
 } else {
     switch (actionToExecute) {
         case 'reverse':
         case 'transform':
             const strToHandle = args[actionFlagIndex + 2];
             if (strToHandle.match(shortNameArgumentPattern)) {
-                process.stderr.write('\nWRONG INPUT: Please, provide a correct string to handle \n\n');
-                process.exit();
+                errorEmitter.emit('error', errors.stringIsNotProvided);
             }
             executionMap.action.execution[actionToExecute](strToHandle);
             break;
@@ -110,14 +113,12 @@ if (!Object.keys(executionMap.action.execution).includes(actionToExecute)) {
         case 'convertToFile':
             const fileFlagIndex = getIndex(executionMap.file.flag);
             if (fileFlagIndex === -1) {
-                process.stderr.write('\nWRONG INPUT: Path to file should be provided \n\n');
-                process.exit();
+                errorEmitter.emit('error', errors.noFileFlag);
             }
             const fileToHandle = getParameter(fileFlagIndex);
 
             if (!~fileToHandle.indexOf('.csv')) {
-                process.stderr.write('\nWRONG INPUT: Correct file should be provided \n\n');
-                process.exit();
+                errorEmitter.emit('error', errors.incorrectFile);
             }
             executionMap.action.execution[actionToExecute](fileToHandle);
             break;
@@ -125,8 +126,7 @@ if (!Object.keys(executionMap.action.execution).includes(actionToExecute)) {
             const pathFlagIndex = getIndex(executionMap.path.flag);
             const pathToHandle = getParameter(pathFlagIndex);
             if (pathFlagIndex === -1 || !pathToHandle) {
-                process.stderr.write('\nWRONG INPUT: Path to directory should be provided \n\n');
-                process.exit();
+                errorEmitter.emit('error', errors.noPathFlag);
             }
             executionMap.action.execution[actionToExecute](pathToHandle);
             break;
