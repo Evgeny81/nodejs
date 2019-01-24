@@ -96,9 +96,7 @@ function getParameter(index) {
 const actionFlagIndex = getIndex(executionMap.action.flag);
 const actionToExecute = getParameter(actionFlagIndex);
 
-if (!Object.keys(executionMap.action.execution).includes(actionToExecute)) {
-    errorEmitter.emit('error', errors.wrongActionParameter);
-} else {
+if (Object.keys(executionMap.action.execution).includes(actionToExecute)) {
     switch (actionToExecute) {
         case 'reverse':
         case 'transform':
@@ -131,6 +129,8 @@ if (!Object.keys(executionMap.action.execution).includes(actionToExecute)) {
             executionMap.action.execution[actionToExecute](pathToHandle);
             break;
     }
+} else {
+    errorEmitter.emit('error', errors.wrongActionParameter);
 }
 
 function help() {
