@@ -4,7 +4,7 @@
   "description": "NodeJS homework application",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon --exec babel-node app.js",
+    "start": "babel-node index.js",
     "test": ""
   },
   "repository": {
@@ -24,5 +24,8 @@
     "babel-preset-stage-2": "6.24.1",
     "babel-register": "6.26.0",
     "nodemon": "1.18.7"
+  },
+  "dependencies": {
+    "express": "^4.16.4"
   }
 }
