@@ -7,7 +7,14 @@
 ```
 npm install
 ```
-3. Run project
+3. To check http servers run
+```
+node http-server/plain-text-server.js
+node http-server/html-server.js
+node http-server/json-server.js
+node http-server/echo-server.js
+```
+3. To check express servers run
 ```
 npm start
 ```
