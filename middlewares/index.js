@@ -1,3 +1,7 @@
-const parsedQuery = require('./query');
+const {parsedQuery} = require('./query');
+const {checkIsUserAuthorized} = require('./auth');
 
-module.exports = parsedQuery;
+module.exports = {
+    checkIsUserAuthorized,
+    parsedQuery
+};

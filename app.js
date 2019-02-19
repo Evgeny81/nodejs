@@ -2,7 +2,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
 const bodyParser = require('body-parser');
-const parsedQuery = require('./middlewares');
+const {parsedQuery} = require('./middlewares');
 
 const {productsRouter, usersRouter, authRouter} = require('./routes');
 const app = express();

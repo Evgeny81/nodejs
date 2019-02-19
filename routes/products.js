@@ -1,6 +1,8 @@
 const {Router} = require('express');
+const {checkIsUserAuthorized} = require('../middlewares');
 const router = Router();
 
+router.use(checkIsUserAuthorized);
 router.route('/')
     .get((req, res) => {
         res.send('Return ​ALL​ products');

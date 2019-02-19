@@ -87,6 +87,7 @@ const authUser = (req, res) => {
             const token = jwt.sign({ id, username }, jwtSecretKey);
             return res.json({code: 200, message: 'OK', data: {user: {email, username}}, token});
         }
+        throw new Error('No user');
     } catch (e) {
         return res.json({code: 404, message: 'Not found', data: {message: 'try another user or password :('}});
     }

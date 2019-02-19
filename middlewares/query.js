@@ -7,4 +7,4 @@ const parsedQuery = function (req, res, next) {
     }
     next();
 };
-module.exports = parsedQuery;
+module.exports = {parsedQuery};
