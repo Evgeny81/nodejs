@@ -7,14 +7,15 @@
 ```
 npm install
 ```
-3. To check http servers run
+3. Migrate all data
 ```
-node http-server/plain-text-server.js
-node http-server/html-server.js
-node http-server/json-server.js
-node http-server/echo-server.js
+node_modules/.bin/sequelize db:migrate
 ```
-3. To check express servers run
+4. Run all seeds
+```
+node_modules/.bin/sequelize db:seed:all
+```
+4. Start server
 ```
 npm start
 ```
