@@ -7,14 +7,11 @@
 ```
 npm install
 ```
-3. To check http servers run
+3. To check task 1 - 4
 ```
-node http-server/plain-text-server.js
-node http-server/html-server.js
 node http-server/json-server.js
-node http-server/echo-server.js
 ```
-3. To check express servers run
+4. To check express servers run
 ```
 npm start
 ```
