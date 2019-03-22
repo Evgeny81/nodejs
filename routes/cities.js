@@ -17,7 +17,11 @@ router.route('/')
         const fieldsCompleted = name && ('capital' in req.body);
         if (fieldsCompleted) {
             return Cities.create({
-                name, country, capital, location: {lat, long}
+                name,
+                country,
+                capital,
+                location: {lat, long},
+                lastModifiedDate: Date.now()
             })
                 .then(data => res.json(data))
                 .catch(e => res.json({code: 400, message: 'Incorrect inputed data', data: {message: 'try another data'}, description: e}));
@@ -29,14 +33,14 @@ router.get('/:id', (req, res) => Cities.findOne({_id: req.params.id}).then(produ
 router.put('/:id', (req, res) => {
     const _id = req.params.id;
     const args = req.body;
-
+    args.lastModifiedDate = Date.now();
     Cities
         .updateOne({_id}, args)
         .then((affectedCount) => {
             if (affectedCount) {
-                res.status(201).json("User Successfuly Updated");
+                res.status(201).json("City Successfuly Updated");
             } else {
-                res.status(404).json("User Not Found");
+                res.status(404).json("City Not Found");
             }
         })
         .catch((err) => {
@@ -49,9 +53,9 @@ router.delete("/:id", (req, res) => {
         .remove({_id: req.params.id})
         .then((affectedCount) => {
             if (affectedCount.n) {
-                res.status(201).json("User Successfuly Deleted");
+                res.status(201).json("City Successfuly Deleted");
             } else {
-                res.status(404).json("User Not Found");
+                res.status(404).json("City Not Found");
             }
         })
         .catch((err) => {

@@ -13,7 +13,8 @@ router.route('/')
                 title,
                 description,
                 price,
-                rate
+                rate,
+                lastModifiedDate: Date.now()
             })
                 .then(data => res.json(data))
                 .catch(e => res.json({code: 400, message: 'Incorrect inputed data', data: {message: 'try another data'}, description: e}));
@@ -35,9 +36,9 @@ router.delete("/:id", (req, res) => {
         .remove({id})
         .then((affectedCount) => {
             if (affectedCount.n) {
-                res.status(201).json("User Successfuly Deleted");
+                res.status(201).json("Product Successfuly Deleted");
             } else {
-                res.status(404).json("User Not Found");
+                res.status(404).json("Product Not Found");
             }
         })
         .catch((err) => {

@@ -15,6 +15,9 @@ const CitiesSchema = new Schema({
     location: {
         lat: Number,
         long: Number
+    },
+    lastModifiedDate: {
+        type: Date
     }
 });
 

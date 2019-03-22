@@ -11,7 +11,10 @@ const ProductsSchema = new Schema({
     },
     description: String,
     rate: Number,
-    price: Number
+    price: Number,
+    lastModifiedDate: {
+        type: Date
+    }
 });
 
 module.exports.Products = mongoose.model('Products', ProductsSchema);
