@@ -7,11 +7,12 @@
 ```
 npm install
 ```
-3. To check task 1 - 4
+3. Install swagger dependencies.
 ```
-node http-server/json-server.js
+cd swagger
+npm install
 ```
-4. To check express servers run
+4. Run swagger from swagger folder
 ```
-npm start
+../node_modules/.bin/swagger project edit
 ```
