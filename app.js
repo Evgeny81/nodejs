@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const parsedQuery = require('./middlewares');
 const {productsRouter, usersRouter, citiesRouter} = require('./routes');
 
-mongoose.connect("mongodb://localhost:27017/usersdb", { useNewUrlParser: true });
+mongoose.connect("mongodb://localhost:27017/hw7", { useNewUrlParser: true });
 
 const app = express();
 app.use(cookieParser());
